@@ -1,0 +1,16 @@
+Django>=4.2
+django-ninja
+pgvector
+psycopg2-binary
+celery
+redis
+requests
+python-dotenv
+pytest
+faker
+factory_boy
+transformers # For embedding model
+torch # For embedding model (transformers dependency)
+llama-cpp-python[server] # For LLM
+django-cors-headers # For CORS middleware
+huggingface-hub

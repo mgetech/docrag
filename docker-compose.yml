@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: ankane/pgvector
+    container_name: pgvector
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: docrag
+      POSTGRES_USER: docraguser
+      POSTGRES_PASSWORD: master
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql # Optional: run init script
+
+volumes:
+  pgdata:
