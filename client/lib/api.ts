@@ -2,104 +2,134 @@
 
 /**
  * This file serves as the API layer for our application.
- * It centralizes all the logic for making requests to the backend API.
- * This is a best practice because it separates data-fetching concerns
- * from our UI components, making the code cleaner and easier to maintain.
+ * It uses a configured Axios instance for robust, enterprise-grade HTTP requests.
+ * Key features:
+ *  - Centralized Configuration: Base URL and headers are set in one place.
+ *  - Automatic Error Handling: Axios rejects promises on non-2xx status codes.
+ *  - Custom Error Type: A custom ApiError class provides detailed error information to the UI.
+ *  - Strict Environment Validation: The app fails fast if the API URL is not configured.
  */
 
-import { Document, TaskStatus, RAGAnswer } from '../types';
+import axios, { AxiosInstance, isAxiosError } from 'axios';
+import { Document, TaskStatus, RAGAnswer, TaskResult } from '../types';
 
-// The base URL of our Django backend.
-// We use an environment variable for this to make it configurable.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// --- Custom Error Class ---
 
-console.log(`API Base URL is set to: ${API_BASE_URL}`);
+/**
+ * A custom error class for API-related errors.
+ * This allows us to capture the status code and backend message for better UI feedback.
+ */
+export class ApiError extends Error {
+  constructor(message: string, public status: number, public details?: any) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+// --- Axios Instance Configuration ---
+
+const getApiBaseUrl = (): string => {
+  const url = process.env.NEXT_PUBLIC_API_URL;
+  if (!url) {
+    // Fail-fast: In a real application, we want to know immediately if config is missing.
+    throw new Error('NEXT_PUBLIC_API_URL is not defined. Please check your .env.local file.');
+  }
+  return url;
+};
+
+const apiClient: AxiosInstance = axios.create({
+  baseURL: getApiBaseUrl(),
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+console.log(`API client configured with base URL: ${getApiBaseUrl()}`);
+
+// --- API Functions ---
+
+/**
+ * A generic error handler for our API calls.
+ * It checks for Axios-specific errors and wraps them in our custom ApiError.
+ * @param error - The error object caught in the try-catch block.
+ * @param context - A string describing the context of the API call (e.g., 'fetching documents').
+ */
+const handleError = (error: unknown, context: string): never => {
+  console.error(`Error ${context}:`, error);
+  if (isAxiosError(error)) {
+    const status = error.response?.status || 500;
+    const message = error.response?.data?.detail || `Failed to ${context}`;
+    throw new ApiError(message, status, error.response?.data);
+  }
+  throw new ApiError(`An unexpected error occurred while ${context}`, 500, error);
+};
 
 /**
  * Fetches the list of all uploaded documents from the backend.
- * @returns A promise that resolves to an array of Document objects.
  */
 export const getDocuments = async (): Promise<Document[]> => {
-  console.log('Fetching documents...');
-  const response = await fetch(`${API_BASE_URL}/api/documents`);
-  if (!response.ok) {
-    console.error('Failed to fetch documents', response);
-    throw new Error('Failed to fetch documents');
+  try {
+    // The backend response includes pagination, so we access the 'results' property.
+    const response = await apiClient.get<{ results: Document[] }>('/api/documents');
+    return response.data.results;
+  } catch (error) {
+    handleError(error, 'fetching documents');
   }
-  const data = await response.json();
-  console.log('Successfully fetched documents:', data.results);
-  // The backend uses pagination, so the documents are in the 'results' field.
-  return data.results;
 };
 
 /**
  * Uploads a new document to the backend.
- * @param file - The file object to be uploaded.
+ */
+/**
+ * @param file The file to be uploaded.
  * @returns A promise that resolves to the newly created Document object.
+ * @throws {ApiError} If the upload fails.
  */
 export const uploadDocument = async (file: File): Promise<Document> => {
-  console.log(`Uploading document: ${file.name}`);
-  
-  // We use FormData to send the file content in the request body.
   const formData = new FormData();
-  formData.append('file', file); // The backend expects the file under the 'file' key.
+  // The key 'file' must match what the backend endpoint expects.
+  formData.append('file', file);
 
-  const response = await fetch(`${API_BASE_URL}/api/upload`, {
-    method: 'POST',
-    body: formData,
-  });
-
-  if (!response.ok) {
-    console.error('Failed to upload document', response);
-    throw new Error('Failed to upload document');
+  try {
+    const response = await apiClient.post<Document>('/api/upload', formData, {
+      headers: {
+        // Override default JSON content type for file uploads
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    handleError(error, 'uploading document');
   }
-  
-  const newDocument = await response.json();
-  console.log('Successfully uploaded document:', newDocument);
-  return newDocument;
 };
 
 /**
  * Submits a question to the RAG system.
- * @param question - The user's question as a string.
- * @returns A promise that resolves to a TaskStatus object, containing the task_id.
+ * @param question The user's question.
+ * @returns A promise that resolves to a TaskStatus object, which includes the task ID.
+ * @throws {ApiError} If the request fails.
  */
 export const askQuestion = async (question: string): Promise<TaskStatus> => {
-  console.log(`Asking question: "${question}"`);
-  const response = await fetch(`${API_BASE_URL}/api/ask`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ question }),
-  });
-
-  if (!response.ok) {
-    console.error('Failed to ask question', response);
-    throw new Error('Failed to ask question');
+  try {
+    const response = await apiClient.post<TaskStatus>('/api/ask', { question });
+    return response.data;
+  } catch (error) {
+    handleError(error, 'asking question');
   }
-
-  const taskStatus = await response.json();
-  console.log('Successfully started question task:', taskStatus);
-  return taskStatus;
 };
 
 /**
  * Fetches the status of a specific task from the backend.
  * This is used for polling the result of the 'ask' operation.
- * @param taskId - The ID of the task to check.
- * @returns A promise that resolves to either a TaskStatus or a RAGAnswer object.
+ * @param taskId The ID of the task to check.
+ * @returns A promise that resolves to a TaskResult, which can be either a TaskStatus or a RAGAnswer.
+ * @throws {ApiError} If the request fails.
  */
-export const getTaskStatus = async (taskId: string): Promise<TaskStatus | RAGAnswer> => {
-  console.log(`Checking task status for task_id: ${taskId}`);
-  const response = await fetch(`${API_BASE_URL}/api/task_status/${taskId}`);
-  
-  if (!response.ok) {
-    console.error(`Failed to get task status for ${taskId}`, response);
-    throw new Error('Failed to get task status');
+export const getTaskStatus = async (taskId: string): Promise<TaskResult> => {
+  try {
+    const response = await apiClient.get<TaskResult>(`/api/task_status/${taskId}`);
+    return response.data;
+  } catch (error) {
+    handleError(error, `getting task status for ${taskId}`);
   }
-
-  const result = await response.json();
-  console.log('Successfully fetched task status:', result);
-  return result;
 };

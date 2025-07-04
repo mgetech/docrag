@@ -36,4 +36,6 @@ module.exports = {
 
   // A path to a module which exports an async function that is triggered once before all test suites
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
+  // A list of paths to modules that run some code to configure or set up the testing framework before each test.
+  setupFiles: ['<rootDir>/jest.setup.js'],
 };
