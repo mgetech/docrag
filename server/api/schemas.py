@@ -45,6 +45,7 @@ class TaskStatusOut(Schema):
 
 # this is the *actual* RAG result
 class RAGAnswerOut(Schema):
+    status: str
     question: str
     answer: str
     retrieved_chunks: List[str]

@@ -1,0 +1,76 @@
+.container {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fafafa;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.selectButton {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s;
+}
+
+.selectButton:hover:not(:disabled) {
+  background-color: #005bb5;
+}
+
+.selectButton:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.uploadButton {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-left: 10px;
+  transition: background-color 0.2s;
+}
+
+.uploadButton:hover:not(:disabled) {
+  background-color: #45a049;
+}
+
+.uploadButton:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.fileName {
+  margin: 12px 0;
+  font-style: italic;
+  color: #555;
+}
+
+.errorMessage {
+  color: #d32f2f;
+  margin-top: 12px;
+}
+
+.successMessage {
+  color: #388e3c;
+  margin-top: 12px;
+}

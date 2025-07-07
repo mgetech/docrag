@@ -1,0 +1,49 @@
+.container {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fafafa;
+  margin-top: 20px;
+}
+
+.title {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.listItem:last-child {
+  border-bottom: none;
+}
+
+.filename {
+  font-weight: 500;
+  color: #444;
+}
+
+.date {
+  font-size: 0.875rem;
+  color: #777;
+}
+
+.emptyMessage {
+  text-align: center;
+  color: #888;
+  padding: 20px;
+  font-style: italic;
+}

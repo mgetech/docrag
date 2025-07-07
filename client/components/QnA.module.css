@@ -1,0 +1,150 @@
+/**
+ * @file QnA.module.css
+ * @description Styles for the QnA component.
+ */
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.textarea:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  align-self: flex-end;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submitButton:hover {
+  background-color: #0056b3;
+}
+
+.submitButton:disabled {
+  background-color: #a0a0a0;
+  cursor: not-allowed;
+}
+
+.loading,
+.error {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.loading {
+  background-color: #e9f5ff;
+  color: #0056b3;
+}
+
+.error {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.resultContainer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.resultHeader {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.qaSection {
+  margin-bottom: 1.5rem;
+}
+
+.qaSection strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+
+.resultQuestion,
+.resultAnswer {
+  display: inline;
+  font-size: 1rem;
+  color: #555;
+}
+
+.resultAnswer {
+  white-space: pre-wrap; /* Preserves whitespace and newlines in the answer */
+}
+
+.chunksContainer {
+  margin-top: 2rem;
+}
+
+.chunksHeader {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.chunksList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.chunk {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.875rem;
+  color: #444;
+}
