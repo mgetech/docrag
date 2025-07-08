@@ -47,6 +47,14 @@ export interface RAGAnswer {
 }
 
 /**
+ * Represents a paginated response for documents from the API.
+ */
+export interface PaginatedDocuments {
+  items: Document[];
+  count: number;
+}
+
+/**
  * A discriminated union for the result of a task.
  * The 'status' property acts as the discriminant.
  * This allows TypeScript to intelligently narrow down the type,

@@ -84,7 +84,7 @@ describe('API Layer (Manual Mock Implementation)', () => {
       const result = await uploadDocument(mockFile);
 
       expect(result).toEqual(mockDocument);
-      expect(mockedAxios.post).toHaveBeenCalledWith('/api/upload', expect.any(FormData), expect.any(Object));
+      expect(mockedAxios.post).toHaveBeenCalledWith('/api/upload', { filename: 'new.pdf', content: 'content' });
     });
   });
 

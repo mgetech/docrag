@@ -11,7 +11,7 @@
  */
 
 import axios, { AxiosInstance, isAxiosError } from 'axios';
-import { Document, TaskStatus, RAGAnswer, TaskResult } from '../types';
+import { Document, TaskStatus, RAGAnswer, TaskResult, PaginatedDocuments } from '../types';
 
 // --- Custom Error Class ---
 
@@ -65,42 +65,62 @@ const handleError = (error: unknown, context: string): never => {
 };
 
 /**
- * Fetches the list of all uploaded documents from the backend.
+ * Fetches a paginated list of uploaded documents from the backend.
+ * @param page - The page number to fetch.
+ * @param pageSize - The number of documents per page.
  */
-export const getDocuments = async (): Promise<Document[]> => {
+export const getDocuments = async (page: number, pageSize: number): Promise<PaginatedDocuments> => {
   try {
-    // The backend response includes pagination, so we access the 'results' property.
-    const response = await apiClient.get<{ results: Document[] }>('/api/documents');
-    return response.data.results;
+    const response = await apiClient.get<PaginatedDocuments>('/api/documents', {
+      params: { page, page_size: pageSize },
+    });
+    return response.data;
   } catch (error) {
     handleError(error, 'fetching documents');
   }
 };
 
 /**
- * Uploads a new document to the backend.
- */
-/**
+ * Uploads a new document to the backend by reading its content as a string.
  * @param file The file to be uploaded.
  * @returns A promise that resolves to the newly created Document object.
  * @throws {ApiError} If the upload fails.
  */
-export const uploadDocument = async (file: File): Promise<Document> => {
-  const formData = new FormData();
-  // The key 'file' must match what the backend endpoint expects.
-  formData.append('file', file);
+export const uploadDocument = (file: File): Promise<Document> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
 
-  try {
-    const response = await apiClient.post<Document>('/api/upload', formData, {
-      headers: {
-        // Override default JSON content type for file uploads
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    handleError(error, 'uploading document');
-  }
+    reader.onload = async (event) => {
+      if (event.target && typeof event.target.result === 'string') {
+        const content = event.target.result;
+        const payload = {
+          filename: file.name,
+          content: content,
+        };
+
+        try {
+          const response = await apiClient.post<Document>('/api/upload', payload);
+          resolve(response.data);
+        } catch (error) {
+          // Use a type assertion to satisfy TypeScript's `unknown` type
+          const apiError = error as ApiError;
+          handleError(apiError, 'uploading document');
+          reject(apiError);
+        }
+      } else {
+        const error = new Error('Failed to read file content.');
+        handleError(error, 'reading file');
+        reject(error);
+      }
+    };
+
+    reader.onerror = (error) => {
+      handleError(error, 'reading file');
+      reject(error);
+    };
+
+    reader.readAsText(file);
+  });
 };
 
 /**

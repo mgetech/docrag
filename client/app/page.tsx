@@ -8,6 +8,8 @@ import { getDocuments } from '../lib/api';
 import { Document } from '../types';
 import styles from './page.module.css';
 
+const PAGE_SIZE = 5;
+
 /**
  * @file page.tsx
  * @description The main page of the DocRAG application.
@@ -19,23 +21,19 @@ import styles from './page.module.css';
  * @returns {JSX.Element} The rendered main page.
  */
 export default function Home(): JSX.Element {
-  // State to hold the list of documents
   const [documents, setDocuments] = useState<Document[]>([]);
-  // State to handle loading indicators
+  const [totalDocuments, setTotalDocuments] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  // State to handle errors during document fetching
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Fetches the list of documents from the API and updates the state.
-   * useCallback is used to memoize the function, preventing unnecessary re-renders.
-   */
-  const fetchDocuments = useCallback(async () => {
+  const fetchDocuments = useCallback(async (page: number) => {
     try {
-      console.log('Fetching documents...');
+      console.log(`Fetching documents for page ${page}...`);
       setIsLoading(true);
-      const fetchedDocuments = await getDocuments();
-      setDocuments(fetchedDocuments);
+      const { items, count } = await getDocuments(page, PAGE_SIZE);
+      setDocuments(items);
+      setTotalDocuments(count);
       setError(null);
     } catch (err) {
       console.error('Error fetching documents:', err);
@@ -45,10 +43,17 @@ export default function Home(): JSX.Element {
     }
   }, []);
 
-  // Fetch documents when the component mounts
   useEffect(() => {
-    fetchDocuments();
-  }, [fetchDocuments]);
+    fetchDocuments(currentPage);
+  }, [currentPage, fetchDocuments]);
+
+  const handleUploadSuccess = () => {
+    // After a successful upload, go back to the first page to see the new doc.
+    setCurrentPage(1);
+    fetchDocuments(1);
+  };
+
+  const totalPages = Math.ceil(totalDocuments / PAGE_SIZE);
 
   return (
     <main className={styles.main}>
@@ -62,13 +67,18 @@ export default function Home(): JSX.Element {
 
         <div className={styles.content}>
           <div className={styles.leftColumn}>
-            <DocumentUpload onUploadSuccess={fetchDocuments} />
+            <DocumentUpload onUploadSuccess={handleUploadSuccess} />
             {isLoading ? (
               <p>Loading documents...</p>
             ) : error ? (
               <p style={{ color: 'red' }}>{error}</p>
             ) : (
-              <DocumentList documents={documents} />
+              <DocumentList
+                documents={documents}
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             )}
           </div>
           <div className={styles.rightColumn}>

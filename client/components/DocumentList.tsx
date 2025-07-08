@@ -15,12 +15,32 @@ import ClientSideDateFormatter from './ClientSideDateFormatter';
 
 interface DocumentListProps {
   documents: Document[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-const DocumentList: React.FC<DocumentListProps> = ({ documents = [] }) => {
+const DocumentList: React.FC<DocumentListProps> = ({
+  documents = [],
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   if (documents.length === 0) {
     return <p className={styles.emptyMessage}>No documents uploaded yet.</p>;
   }
+
+  const handlePrevious = () => {
+    if (currentPage > 1) {
+      onPageChange(currentPage - 1);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      onPageChange(currentPage + 1);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -35,6 +55,25 @@ const DocumentList: React.FC<DocumentListProps> = ({ documents = [] }) => {
           </li>
         ))}
       </ul>
+      <div className={styles.paginationControls}>
+        <button
+          onClick={handlePrevious}
+          disabled={currentPage === 1}
+          className={styles.paginationButton}
+        >
+          Previous
+        </button>
+        <span className={styles.pageInfo}>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className={styles.paginationButton}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 };
