@@ -13,5 +13,12 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./server/init.sql:/docker-entrypoint-initdb.d/init.sql # Optional: run init script
 
+  redis:
+    image: redis:7.0-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
 volumes:
   pgdata:
