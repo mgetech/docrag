@@ -61,13 +61,21 @@ In the `client` directory, you can run the following commands:
 - **`npm test`**: Runs the Jest test suite.
 - **`npm run lint`**: Lints the code for style and error checking.
 
+## ✨ Key Features
+
+- **Document Upload**: Seamlessly upload documents to the backend. The frontend now correctly formats the document content for the backend API.
+- **Document Listing with Pagination**: View a paginated list of all uploaded documents, with navigation controls to browse through pages.
+- **Question & Answer (RAG)**: Ask questions based on the uploaded documents and receive AI-generated answers with source chunks.
+
 ## 🧪 Testing Strategy
 
-Our testing strategy is two-fold:
+Our testing strategy is multi-layered to ensure robustness and reliability:
 
 1.  **Component Tests**: We use **React Testing Library** to test individual components in isolation. These tests verify that components render correctly and respond to user interaction as expected. API calls are mocked to ensure tests are fast and reliable.
 
 2.  **API Layer Tests**: The functions in `lib/api.ts` are unit-tested to ensure they correctly handle both successful responses and network/server errors from the backend. We use a manual mock for `axios` to simulate different API scenarios.
+
+3.  **End-to-End (E2E) Tests**: We utilize **Playwright** to simulate full user journeys, from document upload to asking questions and receiving answers. These tests ensure that all parts of the application (frontend, backend, and their integration) work together seamlessly. Specific enhancements have been made to ensure tests reliably wait for UI state changes, such as document upload completion.
 
 ## 🎨 Styling
 
