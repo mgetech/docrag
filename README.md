@@ -91,7 +91,7 @@ cd docrag
 ```bash
 python -m venv venv
 # Windows
-venc\Scripts\activate
+venv\Scripts\activate
 # macOS/Linux
 source venv/bin/activate
 ```
